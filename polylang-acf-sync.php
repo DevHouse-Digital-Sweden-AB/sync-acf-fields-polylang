@@ -11,8 +11,8 @@ function syncAcfData()
 
     // Variables
     $foreignLangs = pll_languages_list();
-    $postType = 'products';
-    $field_key = 'related_products';
+    $postType = 'solutions';
+    $field_key = 'related_problem_areas';
 
     // Remove EN from languages
     if (in_array('en', $foreignLangs)) {
@@ -66,3 +66,57 @@ function syncAcfData()
     }
 }
 // add_action('template_redirect', 'syncAcfData');
+
+/**
+ * Sync ACF data - Page
+ * By Ross and Alex @DevHouse.
+ */
+function syncAcfPageData()
+{
+    // Check for polylang installation
+    if (!function_exists('pll_get_post')) {
+        return;
+    }
+
+    // Variables
+    $englishPageID = 198;
+    $foreignLangs = pll_languages_list();
+    $field_key = 'featured_problem_areas';
+
+    // Remove EN from languages
+    if (in_array('en', $foreignLangs)) {
+        unset($foreignLangs[0]);
+    }
+
+    // Foreach page translation
+    foreach ($foreignLangs as $lang) {
+        $translationID = pll_get_post($englishPageID, $lang);
+        $newAcfData = [];
+
+        if (!$translationID) {
+            continue;
+        }
+
+        $englishFieldData = get_field($field_key, $englishPageID);
+
+        // Find translations of these items and push to post translation
+        if (!$englishFieldData) {
+            continue;
+        }
+
+        // Loop through foreign post ACF data and update array
+        foreach ($englishFieldData as $englishItem) {
+            $foreignPost = pll_get_post($englishItem, $lang);
+
+            if ($foreignPost) {
+                $newAcfData[] = $foreignPost;
+            }
+        }
+
+        // Update field data for selected foreign posts
+        if (!empty($newAcfData)) {
+            update_field($field_key, $newAcfData, $translationID);
+        }
+    }
+}
+// add_action('template_redirect', 'syncAcfPageData');
