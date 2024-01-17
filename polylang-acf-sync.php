@@ -11,8 +11,8 @@ function syncAcfData()
 
     // Variables
     $foreignLangs = pll_languages_list();
-    $postType = 'solutions';
-    $field_key = 'related_problem_areas';
+    $postType = 'products';
+    $field_key = 'related_articles';
 
     // Remove EN from languages
     if (in_array('en', $foreignLangs)) {
