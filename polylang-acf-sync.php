@@ -120,3 +120,47 @@ function syncAcfPageData()
     }
 }
 // add_action('template_redirect', 'syncAcfPageData');
+
+/* Fix related news items */
+function syncAcfData()
+{
+    // Check for polylang installation
+    if (!function_exists('pll_get_post')) {
+        return;
+    }
+
+    // Variables
+    $foreignLangs = pll_languages_list();
+    $postType = 'solutions';
+    $field_key = 'related_articles';
+
+    // Arguments
+    $args = [
+        'post_type' => $postType,
+        'posts_per_page' => -1,
+        'lang' => '',
+    ];
+
+    $posts = get_posts($args);
+
+    if (!$posts) {
+        return;
+    }
+
+    $posts = array_column($posts, 'ID');
+
+    // For each post
+    foreach ($posts as $post) {
+        $relatedPosts = get_field('related_articles', $post);
+
+        if (!$relatedPosts) {
+            continue;
+        }
+
+        if (in_array(8770, $relatedPosts)) {
+            $relatedPosts = array_diff($relatedPosts, [8770]);
+            update_field($field_key, $relatedPosts, $post);
+        }
+    }
+}
+//  add_action('template_redirect', 'syncAcfData');
